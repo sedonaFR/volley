@@ -67,7 +67,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     private final int mMethod;
 
     /** URL of this request. */
-    private final String mUrl;
+    private String mUrl;
 
     /** Default tag for {@link TrafficStats}. */
     private final int mDefaultTrafficStatsTag;
@@ -135,6 +135,14 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         setRetryPolicy(new DefaultRetryPolicy());
 
         mDefaultTrafficStatsTag = findDefaultTrafficStatsTag(url);
+    }
+
+    /**
+     * Use with caution, make sure that the request has not been added to queue
+     * @param url
+     */
+    public void setUrl(String url){
+        mUrl = url;
     }
 
     /**
