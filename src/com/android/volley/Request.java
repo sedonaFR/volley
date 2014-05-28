@@ -73,7 +73,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     private final int mDefaultTrafficStatsTag;
 
     /** Listener interface for errors. */
-    private final Response.ErrorListener mErrorListener;
+    private Response.ErrorListener mErrorListener;
+
+    public void setErrorListener(Response.ErrorListener mErrorListener) {
+        this.mErrorListener = mErrorListener;
+    }
 
     /** Sequence number of this request, used to enforce FIFO ordering. */
     private Integer mSequence;
