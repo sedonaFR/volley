@@ -296,7 +296,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Returns the cache key for this request.  By default, this is the URL.
      */
     public String getCacheKey() {
-        return getUrl();
+        return getUrl() + getMethod();
     }
 
     /**
