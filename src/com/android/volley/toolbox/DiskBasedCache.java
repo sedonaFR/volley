@@ -223,6 +223,18 @@ public class DiskBasedCache implements Cache {
         }
     }
 
+    @Override
+    public synchronized void removeByCriteria(String... criteria){
+        for(Iterator<Map.Entry<String, CacheHeader>> it = mEntries.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<String, CacheHeader> entry = it.next();
+            for(String c: criteria) {
+                if (entry.getKey().contains(c)) {
+                    it.remove();
+                }
+            }
+        }
+    }
+
     /**
      * Creates a pseudo-unique filename for the specified cache key.
      * @param key The key to generate a file name for.

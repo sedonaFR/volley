@@ -44,6 +44,11 @@ public class NoCache implements Cache {
     }
 
     @Override
+    public void removeByCriteria(String... criteria){
+
+    }
+
+    @Override
     public void initialize() {
     }
 }
