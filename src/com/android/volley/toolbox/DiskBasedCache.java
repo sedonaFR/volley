@@ -225,14 +225,24 @@ public class DiskBasedCache implements Cache {
 
     @Override
     public synchronized void removeByCriteria(String... criteria){
-        for(Iterator<Map.Entry<String, CacheHeader>> it = mEntries.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<String, CacheHeader> entry = it.next();
+        Object[] entries = mEntries.entrySet().toArray();
+        for(int i=0; i< mTotalSize; i++){
+            Map.Entry<String, CacheHeader> entry = (Map.Entry<String, CacheHeader>) entries[i];
+
             for(String c: criteria) {
                 if (entry.getKey().contains(c)) {
-                    it.remove();
+                    removeEntry(entry.getKey());
                 }
             }
         }
+//        for(Iterator<Map.Entry<String, CacheHeader>> it = mEntries.entrySet().iterator(); it.hasNext(); ) {
+//            Map.Entry<String, CacheHeader> entry = it.next();
+//            for(String c: criteria) {
+//                if (entry.getKey().contains(c)) {
+//                    it.remove();
+//                }
+//            }
+//        }
     }
 
     /**
