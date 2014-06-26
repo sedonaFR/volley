@@ -226,7 +226,7 @@ public class DiskBasedCache implements Cache {
     @Override
     public synchronized void removeByCriteria(String... criteria){
         Object[] entries = mEntries.entrySet().toArray();
-        for(int i=0; i< mTotalSize; i++){
+        for(int i=0; i< entries.length; i++){
             Map.Entry<String, CacheHeader> entry = (Map.Entry<String, CacheHeader>) entries[i];
 
             for(String c: criteria) {
