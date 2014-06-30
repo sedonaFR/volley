@@ -122,7 +122,6 @@ public class HurlStack implements HttpStack {
         List<HttpCookie> cookiesList = cookieManager.getCookieStore().get(uriCookie);
         if(cookiesList.size() > 0) {
             String cookiesStr = TextUtils.join(";", cookiesList);
-            Log.d("HurlStack", "add cookies" + cookiesStr);
             connection.addRequestProperty("Cookie", cookiesStr);
         }
         setConnectionParametersForRequest(connection, request);
@@ -146,14 +145,7 @@ public class HurlStack implements HttpStack {
             }
         }
 
-        //Save cookies TODO use header from response ?
-//        for(Header header: response.getAllHeaders()){
-//            Log.d("HurlStack", "response getAllHeaders " + header.getName() + " " + header.getValue());
-//        }
-        for(Entry<String, List<String>> header: connection.getHeaderFields().entrySet()){
-            Log.d("HurlStack", "connection getHeaderFields " + header.getKey() + " " + header.getValue());
-        }
-
+        //Save cookies
         for(Entry<String, List<String>> header: connection.getHeaderFields().entrySet()){
             if("Set-Cookie".equals(header.getKey())){
                 for(String cookie: header.getValue()){
