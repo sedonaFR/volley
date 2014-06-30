@@ -67,13 +67,17 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     private final int mMethod;
 
     /** URL of this request. */
-    private final String mUrl;
+    private String mUrl;
 
     /** Default tag for {@link TrafficStats}. */
     private final int mDefaultTrafficStatsTag;
 
     /** Listener interface for errors. */
-    private final Response.ErrorListener mErrorListener;
+    private Response.ErrorListener mErrorListener;
+
+    public void setErrorListener(Response.ErrorListener mErrorListener) {
+        this.mErrorListener = mErrorListener;
+    }
 
     /** Sequence number of this request, used to enforce FIFO ordering. */
     private Integer mSequence;
@@ -135,6 +139,14 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         setRetryPolicy(new DefaultRetryPolicy());
 
         mDefaultTrafficStatsTag = findDefaultTrafficStatsTag(url);
+    }
+
+    /**
+     * Use with caution, make sure that the request has not been added to queue
+     * @param url
+     */
+    public void setUrl(String url){
+        mUrl = url;
     }
 
     /**
@@ -284,7 +296,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Returns the cache key for this request.  By default, this is the URL.
      */
     public String getCacheKey() {
-        return getUrl();
+        return getUrl() + getMethod();
     }
 
     /**
@@ -444,9 +456,13 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         StringBuilder encodedParams = new StringBuilder();
         try {
             for (Map.Entry<String, String> entry : params.entrySet()) {
+                String value = entry.getValue();
+                if(value  == null){
+                    continue;
+                }
                 encodedParams.append(URLEncoder.encode(entry.getKey(), paramsEncoding));
                 encodedParams.append('=');
-                encodedParams.append(URLEncoder.encode(entry.getValue(), paramsEncoding));
+                encodedParams.append(URLEncoder.encode(value, paramsEncoding));
                 encodedParams.append('&');
             }
             return encodedParams.toString().getBytes(paramsEncoding);

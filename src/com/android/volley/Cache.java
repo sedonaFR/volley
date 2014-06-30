@@ -57,6 +57,11 @@ public interface Cache {
     public void remove(String key);
 
     /**
+     * Removes an entry from the cache.
+     */
+    public void removeByCriteria(String... criteria);
+
+    /**
      * Empties the cache.
      */
     public void clear();

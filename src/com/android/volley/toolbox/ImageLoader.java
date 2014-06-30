@@ -30,6 +30,7 @@ import com.android.volley.toolbox.ImageRequest;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * Helper that handles loading and caching images from remote URLs.
@@ -171,6 +172,14 @@ public class ImageLoader {
         return get(requestUrl, listener, 0, 0);
     }
 
+    public ImageContainer get(String requestUrl, final ImageListener listener, Map<String, String> httpHeaders) {
+        return get(requestUrl, listener, 0, 0, httpHeaders);
+    }
+
+    public ImageContainer get(String requestUrl, ImageListener imageListener, int maxWidth, int maxHeight) {
+        return get(requestUrl, imageListener, maxWidth, maxHeight, null);
+    }
+
     /**
      * Issues a bitmap request with the given URL if that image is not available
      * in the cache, and returns a bitmap container that contains all of the data
@@ -184,7 +193,7 @@ public class ImageLoader {
      *     the currently available image (default if remote is not loaded).
      */
     public ImageContainer get(String requestUrl, ImageListener imageListener,
-            int maxWidth, int maxHeight) {
+            int maxWidth, int maxHeight, Map<String, String> httpHeaders) {
         // only fulfill requests that were initiated from the main thread.
         throwIfNotOnMainThread();
 
@@ -200,8 +209,7 @@ public class ImageLoader {
         }
 
         // The bitmap did not exist in the cache, fetch it!
-        ImageContainer imageContainer =
-                new ImageContainer(null, requestUrl, cacheKey, imageListener);
+        ImageContainer imageContainer = new ImageContainer(null, requestUrl, cacheKey, imageListener);
 
         // Update the caller to let them know that they should use the default bitmap.
         imageListener.onResponse(imageContainer, true);
@@ -228,7 +236,7 @@ public class ImageLoader {
                 public void onErrorResponse(VolleyError error) {
                     onGetImageError(cacheKey, error);
                 }
-            });
+            }, httpHeaders);
 
         mRequestQueue.add(newRequest);
         mInFlightRequests.put(cacheKey,
