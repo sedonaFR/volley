@@ -16,6 +16,7 @@
 
 package com.android.volley.toolbox;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
@@ -26,6 +27,9 @@ import com.android.volley.VolleyLog;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A canned request for getting an image at a given URL and calling
@@ -48,6 +52,7 @@ public class ImageRequest extends Request<Bitmap> {
 
     /** Decoding lock so that we don't decode more than one image at a time (to avoid OOM's) */
     private static final Object sDecodeLock = new Object();
+    private final Map<String, String> mhttpHeaders;
 
     /**
      * Creates a new image request, decoding to a maximum specified width and
@@ -67,7 +72,7 @@ public class ImageRequest extends Request<Bitmap> {
      * @param errorListener Error listener, or null to ignore errors
      */
     public ImageRequest(String url, Response.Listener<Bitmap> listener, int maxWidth, int maxHeight,
-            Config decodeConfig, Response.ErrorListener errorListener) {
+            Config decodeConfig, Response.ErrorListener errorListener, Map<String, String> httpHeaders) {
         super(Method.GET, url, errorListener);
         setRetryPolicy(
                 new DefaultRetryPolicy(IMAGE_TIMEOUT_MS, IMAGE_MAX_RETRIES, IMAGE_BACKOFF_MULT));
@@ -75,11 +80,20 @@ public class ImageRequest extends Request<Bitmap> {
         mDecodeConfig = decodeConfig;
         mMaxWidth = maxWidth;
         mMaxHeight = maxHeight;
+        mhttpHeaders = httpHeaders;
     }
 
     @Override
     public Priority getPriority() {
         return Priority.LOW;
+    }
+
+    @Override
+    public Map<String, String> getHeaders() throws AuthFailureError {
+        if(mhttpHeaders == null){
+            return super.getHeaders();
+        }
+        return mhttpHeaders;
     }
 
     /**
