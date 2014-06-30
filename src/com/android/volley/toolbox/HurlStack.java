@@ -16,6 +16,10 @@
 
 package com.android.volley.toolbox;
 
+import android.annotation.TargetApi;
+import android.text.TextUtils;
+import android.util.Log;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
@@ -33,7 +37,10 @@ import org.apache.http.message.BasicStatusLine;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.CookieManager;
+import java.net.HttpCookie;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +53,7 @@ import javax.net.ssl.SSLSocketFactory;
 /**
  * An {@link HttpStack} based on {@link HttpURLConnection}.
  */
+@TargetApi(9)
 public class HurlStack implements HttpStack {
 
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
@@ -82,12 +90,16 @@ public class HurlStack implements HttpStack {
     public HurlStack(UrlRewriter urlRewriter, SSLSocketFactory sslSocketFactory) {
         mUrlRewriter = urlRewriter;
         mSslSocketFactory = sslSocketFactory;
+        cookieManager = new CookieManager();
     }
+
+    private final java.net.CookieManager cookieManager;
 
     @Override
     public HttpResponse performRequest(Request<?> request, Map<String, String> additionalHeaders)
             throws IOException, AuthFailureError {
         String url = request.getUrl();
+
         HashMap<String, String> map = new HashMap<String, String>();
         map.putAll(request.getHeaders());
         map.putAll(additionalHeaders);
@@ -98,12 +110,23 @@ public class HurlStack implements HttpStack {
             }
             url = rewritten;
         }
+
         URL parsedUrl = new URL(url);
+        URI uriCookie = URI.create(parsedUrl.getProtocol() +"://"+parsedUrl.getHost());
+
         HttpURLConnection connection = openConnection(parsedUrl, request);
         for (String headerName : map.keySet()) {
             connection.addRequestProperty(headerName, map.get(headerName));
         }
+
+        List<HttpCookie> cookiesList = cookieManager.getCookieStore().get(uriCookie);
+        if(cookiesList.size() > 0) {
+            String cookiesStr = TextUtils.join(";", cookiesList);
+            Log.d("HurlStack", "add cookies" + cookiesStr);
+            connection.addRequestProperty("Cookie", cookiesStr);
+        }
         setConnectionParametersForRequest(connection, request);
+
         // Initialize HttpResponse with data from the HttpURLConnection.
         ProtocolVersion protocolVersion = new ProtocolVersion("HTTP", 1, 1);
         int responseCode = connection.getResponseCode();
@@ -112,8 +135,8 @@ public class HurlStack implements HttpStack {
             // Signal to the caller that something was wrong with the connection.
             throw new IOException("Could not retrieve response code from HttpUrlConnection.");
         }
-        StatusLine responseStatus = new BasicStatusLine(protocolVersion,
-                connection.getResponseCode(), connection.getResponseMessage());
+
+        StatusLine responseStatus = new BasicStatusLine(protocolVersion, connection.getResponseCode(), connection.getResponseMessage());
         BasicHttpResponse response = new BasicHttpResponse(responseStatus);
         response.setEntity(entityFromConnection(connection));
         for (Entry<String, List<String>> header : connection.getHeaderFields().entrySet()) {
@@ -122,6 +145,23 @@ public class HurlStack implements HttpStack {
                 response.addHeader(h);
             }
         }
+
+        //Save cookies TODO use header from response ?
+//        for(Header header: response.getAllHeaders()){
+//            Log.d("HurlStack", "response getAllHeaders " + header.getName() + " " + header.getValue());
+//        }
+        for(Entry<String, List<String>> header: connection.getHeaderFields().entrySet()){
+            Log.d("HurlStack", "connection getHeaderFields " + header.getKey() + " " + header.getValue());
+        }
+
+        for(Entry<String, List<String>> header: connection.getHeaderFields().entrySet()){
+            if("Set-Cookie".equals(header.getKey())){
+                for(String cookie: header.getValue()){
+                    cookieManager.getCookieStore().add(uriCookie, HttpCookie.parse(cookie).get(0));
+                }
+            }
+        }
+
         return response;
     }
 

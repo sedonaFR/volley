@@ -16,7 +16,9 @@
 
 package com.android.volley.toolbox;
 
+import android.net.Uri;
 import android.os.SystemClock;
+import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
@@ -46,12 +48,19 @@ import java.net.SocketTimeoutException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A network performing Volley requests over an {@link HttpStack}.
  */
 public class BasicNetwork implements Network {
     protected static final boolean DEBUG = VolleyLog.DEBUG;
+
+    private static Map<String, Set<String>> cookiesByDomain;
+
+    public static void allowCookies(){
+        cookiesByDomain = new HashMap<String, Set<String>>();
+    }
 
     private static int SLOW_REQUEST_THRESHOLD_MS = 3000;
 
@@ -94,7 +103,7 @@ public class BasicNetwork implements Network {
                 StatusLine statusLine = httpResponse.getStatusLine();
                 int statusCode = statusLine.getStatusCode();
 
-                responseHeaders = convertHeaders(httpResponse.getAllHeaders());
+                responseHeaders = convertHeaders(request.getUrl(), httpResponse.getAllHeaders());
                 // Handle cache validation.
                 if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
                     return new NetworkResponse(HttpStatus.SC_NOT_MODIFIED,
@@ -239,10 +248,11 @@ public class BasicNetwork implements Network {
     /**
      * Converts Headers[] to Map<String, String>.
      */
-    private static Map<String, String> convertHeaders(Header[] headers) {
+    private static Map<String, String> convertHeaders(String url, Header[] headers) {
         Map<String, String> result = new HashMap<String, String>();
         for (int i = 0; i < headers.length; i++) {
-            result.put(headers[i].getName(), headers[i].getValue());
+            Header header = headers[i];
+            result.put(header.getName(), header.getValue());
         }
         return result;
     }
