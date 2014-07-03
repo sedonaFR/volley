@@ -122,6 +122,7 @@ public class HurlStack implements HttpStack {
         List<HttpCookie> cookiesList = cookieManager.getCookieStore().get(uriCookie);
         if(cookiesList.size() > 0) {
             String cookiesStr = TextUtils.join(";", cookiesList);
+            Log.d("cookiesStr", cookiesStr);
             connection.addRequestProperty("Cookie", cookiesStr);
         }
         setConnectionParametersForRequest(connection, request);
