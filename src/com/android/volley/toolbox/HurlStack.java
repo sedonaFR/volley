@@ -21,6 +21,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.BuildConfig;
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
 
@@ -96,8 +97,7 @@ public class HurlStack implements HttpStack {
     private final java.net.CookieManager cookieManager;
 
     @Override
-    public HttpResponse performRequest(Request<?> request, Map<String, String> additionalHeaders)
-            throws IOException, AuthFailureError {
+    public HttpResponse performRequest(Request<?> request, Map<String, String> additionalHeaders)  throws IOException, AuthFailureError {
         String url = request.getUrl();
 
         HashMap<String, String> map = new HashMap<String, String>();
@@ -122,7 +122,9 @@ public class HurlStack implements HttpStack {
         List<HttpCookie> cookiesList = cookieManager.getCookieStore().get(uriCookie);
         if(cookiesList.size() > 0) {
             String cookiesStr = TextUtils.join(";", cookiesList);
-            Log.d("cookiesStr", cookiesStr);
+            if(BuildConfig.DEBUG){
+                Log.d("HurlStack", "add Cookies " + cookiesStr + " for " + url);
+            }
             connection.addRequestProperty("Cookie", cookiesStr);
         }
         setConnectionParametersForRequest(connection, request);
@@ -150,7 +152,10 @@ public class HurlStack implements HttpStack {
         for(Entry<String, List<String>> header: connection.getHeaderFields().entrySet()){
             if("Set-Cookie".equals(header.getKey())){
                 for(String cookie: header.getValue()){
-                    cookieManager.getCookieStore().add(uriCookie, HttpCookie.parse(cookie).get(0));
+                    List<HttpCookie> cookies = HttpCookie.parse(cookie);
+                    for(HttpCookie c: cookies){
+                        cookieManager.getCookieStore().add(uriCookie, c);
+                    };
                 }
             }
         }
@@ -223,8 +228,7 @@ public class HurlStack implements HttpStack {
                     // output stream.
                     connection.setDoOutput(true);
                     connection.setRequestMethod("POST");
-                    connection.addRequestProperty(HEADER_CONTENT_TYPE,
-                            request.getPostBodyContentType());
+                    connection.addRequestProperty(HEADER_CONTENT_TYPE, request.getPostBodyContentType());
                     DataOutputStream out = new DataOutputStream(connection.getOutputStream());
                     out.write(postBody);
                     out.close();
