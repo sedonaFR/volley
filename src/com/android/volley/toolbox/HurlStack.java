@@ -24,6 +24,7 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.BuildConfig;
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
+import com.android.volley.VolleyLog;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -122,7 +123,7 @@ public class HurlStack implements HttpStack {
         List<HttpCookie> cookiesList = cookieManager.getCookieStore().get(uriCookie);
         if(cookiesList.size() > 0) {
             String cookiesStr = TextUtils.join(";", cookiesList);
-            if(BuildConfig.DEBUG){
+            if(VolleyLog.DEBUG){
                 Log.d("HurlStack", "add Cookies " + cookiesStr + " for " + url);
             }
             connection.addRequestProperty("Cookie", cookiesStr);
@@ -149,17 +150,25 @@ public class HurlStack implements HttpStack {
         }
 
         //Save cookies
+        String logCookies = "";
         for(Entry<String, List<String>> header: connection.getHeaderFields().entrySet()){
             if("Set-Cookie".equals(header.getKey())){
                 for(String cookie: header.getValue()){
                     List<HttpCookie> cookies = HttpCookie.parse(cookie);
                     for(HttpCookie c: cookies){
                         cookieManager.getCookieStore().add(uriCookie, c);
+
+                        if(VolleyLog.DEBUG){
+                            logCookies += "[" + c.getName() +":" + c.getValue() + "]";
+                        }
                     };
                 }
             }
         }
 
+        if(VolleyLog.DEBUG){
+            Log.d("HurlStack", "Set-Cookie " + logCookies);
+        }
         return response;
     }
 
