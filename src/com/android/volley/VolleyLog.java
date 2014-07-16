@@ -97,6 +97,10 @@ public class VolleyLog {
                 Thread.currentThread().getId(), caller, msg);
     }
 
+    public static void forceLog(boolean b) {
+        DEBUG = b;
+    }
+
     /**
      * A simple event log with records containing a name, thread ID, and timestamp.
      */

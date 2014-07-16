@@ -24,6 +24,7 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.BuildConfig;
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
+import com.android.volley.VolleyLog;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -119,11 +120,12 @@ public class HurlStack implements HttpStack {
             connection.addRequestProperty(headerName, map.get(headerName));
         }
 
+        List<HttpCookie> cookiesLog = cookieManager.getCookieStore().getCookies();
         List<HttpCookie> cookiesList = cookieManager.getCookieStore().get(uriCookie);
         if(cookiesList.size() > 0) {
             String cookiesStr = TextUtils.join(";", cookiesList);
-            if(BuildConfig.DEBUG){
-                Log.d("HurlStack", "add Cookies " + cookiesStr + " for " + url);
+            if(VolleyLog.DEBUG){
+                Log.d("HurlStack", "add Cookies " + cookiesStr + " for " + uriCookie);
             }
             connection.addRequestProperty("Cookie", cookiesStr);
         }
@@ -149,15 +151,26 @@ public class HurlStack implements HttpStack {
         }
 
         //Save cookies
+        String logTmp = "";
+
         for(Entry<String, List<String>> header: connection.getHeaderFields().entrySet()){
             if("Set-Cookie".equals(header.getKey())){
                 for(String cookie: header.getValue()){
                     List<HttpCookie> cookies = HttpCookie.parse(cookie);
                     for(HttpCookie c: cookies){
+                        if(c.getDomain() == null){
+                            c.setDomain(uriCookie.getHost());
+                        }
                         cookieManager.getCookieStore().add(uriCookie, c);
+                        if(VolleyLog.DEBUG){
+                            logTmp += "[" + c.getName()+"::::"+c.getValue()+"] ";
+                        }
                     };
                 }
             }
+        }
+        if(VolleyLog.DEBUG){
+            Log.d("HurlStack", "Cookies to save: " + logTmp);
         }
 
         return response;
