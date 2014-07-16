@@ -21,9 +21,12 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.http.AndroidHttpClient;
 import android.os.Build;
+import android.util.Log;
 
+import com.android.volley.BuildConfig;
 import com.android.volley.Network;
 import com.android.volley.RequestQueue;
+import com.android.volley.VolleyLog;
 
 import java.io.File;
 

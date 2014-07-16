@@ -26,6 +26,7 @@ import java.util.Locale;
 /** Logging helper class. */
 public class VolleyLog {
     public static String TAG = "Volley";
+    private static boolean forceLog = false;
 
     public static boolean DEBUG = Log.isLoggable(TAG, Log.VERBOSE);
 
@@ -42,7 +43,12 @@ public class VolleyLog {
         TAG = tag;
 
         // Reinitialize the DEBUG "constant"
-        DEBUG = Log.isLoggable(TAG, Log.VERBOSE);
+        DEBUG = forceLog || Log.isLoggable(TAG, Log.VERBOSE);
+    }
+
+    public static void forceLog(boolean enable){
+        DEBUG = enable;
+        forceLog = enable;
     }
 
     public static void v(String format, Object... args) {
@@ -95,10 +101,6 @@ public class VolleyLog {
         }
         return String.format(Locale.US, "[%d] %s: %s",
                 Thread.currentThread().getId(), caller, msg);
-    }
-
-    public static void forceLog(boolean b) {
-        DEBUG = b;
     }
 
     /**
