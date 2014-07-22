@@ -46,6 +46,11 @@ import fr.sedona.volley.parsers.SimpleParser;
  */
 public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorListener {
 
+    public static final int POST = Method.POST;
+    public static final int GET = Method.GET;
+    public static final int PUT = Method.PUT;
+    public static final int DELETE = Method.DELETE;
+
     public static final int DEFAULT_REQUEST_TIMEOUT = 15000;
     public static final int NO_REQUEST_RETRY_COUNT = 0;
     public static final long CACHE_TIME_ONE_DAY = 1000 * 60 * 60 * 24;
