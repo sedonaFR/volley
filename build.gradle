@@ -38,4 +38,5 @@ dependencies {
     compile 'com.android.support:support-v4:19.1.+'
     compile files('libs/gson-1.7.1.jar') // 2.2.4 has internal loop problems
     compile files('libs/disklrucache-2.0.2.jar')
+    compile fileTree(dir: '../libs', include: '*.jar')
 }
