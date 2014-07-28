@@ -41,7 +41,8 @@ dependencies {
     compile files('libs/gson-1.7.1.jar') // 2.2.4 has internal loop problems
     compile files('libs/disklrucache-2.0.2.jar')
 
-    //Other libs (xml parsing)
+    //Other libs : the jar must be placed in the "lib/" folder in the root of the project, not inside a project
+    //xml parsing
     //if(folderOtherLibs.exists()) {
         compile fileTree(dir: '../libs', include: '*.jar')
     //}
