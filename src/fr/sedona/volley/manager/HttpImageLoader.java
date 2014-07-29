@@ -119,9 +119,9 @@ public class HttpImageLoader {
 
                 Bitmap bmp = null;
                 if(isPngCache){
-                    bmp = diskCache.getBitmap(s);
-                } else{
                     bmp = diskCachePNG.getBitmap(s);
+                } else{
+                    bmp = diskCache.getBitmap(s);
                 }
 
                 if (bmp != null) {
