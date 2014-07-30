@@ -30,9 +30,9 @@ public class XmlParserSimple<T> implements SimpleParser<T> {
         try {
             if(serializer == null){
                 serializer = Class.forName("org.simpleframework.xml.core.Persister").newInstance();
-                method = serializer.getClass().getDeclaredMethod("read", java.lang.Class.class, java.io.InputStream.class);
+                method = serializer.getClass().getDeclaredMethod("read", java.lang.Class.class, java.io.InputStream.class, boolean.class);
             }
-            return  (T) method.invoke(serializer, clazz, new ByteArrayInputStream(data));
+            return  (T) method.invoke(serializer, clazz, new ByteArrayInputStream(data), false);
 
         } catch (InstantiationException e) {
             e.printStackTrace();
