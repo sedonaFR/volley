@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 The Android Open Source Project
+ * Modified by Sedona Paris - 2014
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +22,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.BuildConfig;
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
 import com.android.volley.VolleyLog;
