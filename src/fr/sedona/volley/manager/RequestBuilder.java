@@ -264,8 +264,26 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     }
 
     /**
+     * Create a GET request
+     * @param url Url to use
+     * @param getParams Get params or null, mandatory because it is used to generate the url
+     */
+    public RequestBuilder(String url, Map<String, Object> getParams) {
+        this(RequestBuilder.GET, url, getParams);
+    }
+
+    /**
+     * Create a request with mandatory parameters without GET Params
+     * @param method Volley post or get method, etc : RequestBuilder.GET, RequestBuilder.POST
+     * @param url Url to use
+     */
+    public RequestBuilder(int method, String url) {
+        this(method, null, null);
+    }
+
+    /**
      * Create a request with mandatory parameters
-     * @param method Volley post or get method, etc
+     * @param method Volley post or get method, etc : RequestBuilder.GET, RequestBuilder.POST
      * @param url Url to use
      * @param getParams Get params or null, mandatory because it is used to generate the url
      */
@@ -290,10 +308,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
             if (dataParsed != null) {
                 try {
                     ResultInfo queryResultInfo = new ResultInfo(ResultInfo.CODE_QUERY.SUCCESS);
-                    QueryCallback callback = callbackRef.get();
-                    if(callback != null){
-                        callback.onQueryFinished(queryId, queryResultInfo, (T) dataParsed, null);
-                    }
+                    sendCallback(queryResultInfo, (T) dataParsed, null);
                     return;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -304,11 +319,10 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     }
 
     protected String generateUrl(String url, Map<String, Object> getParameters) {
-        String getUrl = url;
-        if(getParameters != null) {
-            getUrl +=  generateGetParameters(getUrl, getParameters);
+        if(getParameters == null || url == null) {
+            return url;
         }
-        return getUrl;
+        return url + generateGetParameters(url, getParameters);
     }
 
     private String generateGetParameters(String url, Map<String, Object> parameters) {
@@ -385,11 +399,6 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         if (allowBeanCache) {
             BeanCacheMap.get().put(getUrl(), dataParsed);
         }
-        if(callbackRef != null) {
-            QueryCallback<T, E> callback = callbackRef.get();
-            if (callback == null) {
-                return;
-            }
 
             //Build metadata for callback
             ResultInfo queryResultInfo = new ResultInfo();
@@ -405,10 +414,18 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
             }
             queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.SUCCESS;
 
-            callback.onQueryFinished(queryId, queryResultInfo, dataParsed, null);
-        }
+            sendCallback(queryResultInfo, dataParsed, null);
     }
 
+    protected void sendCallback(ResultInfo queryResultInfo, T dataParsed, E dataError){
+        if(callbackRef != null) {
+            QueryCallback<T, E> callback = callbackRef.get();
+            if (callback == null) {
+                return;
+            }
+            callback.onQueryFinished(queryId, queryResultInfo, dataParsed, dataError);
+        }
+    }
 
 
     @SuppressWarnings("unchecked")
@@ -418,11 +435,6 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
             error.printStackTrace();
         }
 
-        if(callbackRef != null) {
-            QueryCallback<T, E> listener = callbackRef.get();
-            if (listener == null) {
-                return;
-            }
 
             ResultInfo queryResultInfo = new ResultInfo(ResultInfo.CODE_QUERY.SERVER_ERROR);
             queryResultInfo.setTag(tag);
@@ -447,8 +459,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
                 }
             }
 
-            listener.onQueryFinished(queryId, queryResultInfo, null, dataParsed);
-        }
+            sendCallback(queryResultInfo, null, dataParsed);
     }
 
     /**
