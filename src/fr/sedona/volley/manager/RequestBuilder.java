@@ -81,6 +81,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
 
     protected String postParamRaw;
     protected String contentType;
+    protected static String multipartBoundary = "AaB03xBounDaRy";
     protected Map<String, String> postParamUrlEncoded;
 
     protected static Gson gson;
@@ -147,6 +148,35 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
      */
     public RequestBuilder postParamRaw(String postParamRaw) {
         this.postParamRaw = postParamRaw;
+        return this;
+    }
+
+
+    public RequestBuilder postAddMultipart(String contentType, String postParamRaw) {
+        if(contentType == null){
+            contentType = "multipart/form-data, boundary="+multipartBoundary;
+        }
+        if(this.postParamRaw == null){
+            this.postParamRaw = "";
+        }
+
+        this.postParamRaw += "\n--"+multipartBoundary+"\n";
+        this.postParamRaw += "content-disposition: "+ contentType + ";\n";
+        this.postParamRaw += postParamRaw;
+        return this;
+    }
+
+    public RequestBuilder postAddMultipartForm(String name, String value) {
+        if(contentType == null){
+            contentType = "multipart/form-data, boundary="+multipartBoundary;
+        }
+        if(this.postParamRaw == null){
+            this.postParamRaw = "";
+        }
+
+        this.postParamRaw += "\n--"+multipartBoundary+"\n";
+        this.postParamRaw += "content-disposition: form-data; name=" + name+"\n";
+        this.postParamRaw += "\n" + value;
         return this;
     }
 
