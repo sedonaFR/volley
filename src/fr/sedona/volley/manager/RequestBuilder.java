@@ -210,8 +210,6 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         return this;
     }
 
-    //TODO XML parser implementing SimpleParser
-
     /**
      * Parser of success
      * @param type
