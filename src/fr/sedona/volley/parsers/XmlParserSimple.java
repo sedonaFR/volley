@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
 
 /**
  * The Persister is not referenced directly but dynamically to avoid being force to load the jar.
- * Use simple-xml-2.7.1 http://simple.sourceforge.net/download.php
+ * Use simple-xml-2.7.1 http://simple.sourceforge.net/download.php and put the jar in a lib/ folder in the root of the project
  */
 public class XmlParserSimple<T> implements SimpleParser<T> {
 
