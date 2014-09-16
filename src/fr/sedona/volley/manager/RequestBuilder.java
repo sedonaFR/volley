@@ -151,8 +151,11 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         return this;
     }
 
+    private boolean isMultipart = false;
 
-    public RequestBuilder postAddMultipart(String contentType, String postParamRaw) {
+
+    public RequestBuilder postAddMultipart(String headerText, String postParamRaw) {
+        isMultipart = true;
         if(contentType == null){
             contentType = "multipart/form-data, boundary="+multipartBoundary;
         }
@@ -161,12 +164,13 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         }
 
         this.postParamRaw += "\n--"+multipartBoundary+"\n";
-        this.postParamRaw += "content-disposition: "+ contentType + ";\n";
+        this.postParamRaw += headerText + ";\n";
         this.postParamRaw += postParamRaw;
         return this;
     }
 
     public RequestBuilder postAddMultipartForm(String name, String value) {
+        isMultipart = true;
         if(contentType == null){
             contentType = "multipart/form-data, boundary="+multipartBoundary;
         }
@@ -395,6 +399,9 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     @Override
     public byte[] getBody() throws AuthFailureError {
         if (postParamRaw != null) {
+            if(isMultipart){
+                this.postParamRaw += "\n--"+multipartBoundary;
+            }
             return postParamRaw.getBytes();
         }
         return super.getBody();
