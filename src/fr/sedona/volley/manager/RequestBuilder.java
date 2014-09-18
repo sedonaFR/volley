@@ -87,6 +87,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     protected static Gson gson;
     protected static RequestQueue queue;
     private Object tag;
+    private StringPreprocessor preprocessor;
 
     public static RequestQueue getQueue(){
         return queue;
@@ -109,6 +110,14 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     public static void clearCacheUpdate(String... criteria){
         BeanCacheMap.get().clear();//Clear all RAM cache: this cache is used only for high performance when going back and up again
         RequestBuilder.getQueue().getCache().removeByCriteria(criteria);
+    }
+
+    public static interface StringPreprocessor {
+        public String preprocess(String s);
+    }
+
+    public void setPreprocessor(StringPreprocessor preprocessor) {
+        this.preprocessor = preprocessor;
     }
 
     /**
@@ -532,7 +541,12 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
             } else if (dataParser instanceof Type){
                 //Json parsing
                 Type type = (Type) dataParser;
-                dataParsed = gson.fromJson(new String(data), type);
+
+                String s = new String(data);
+                if(preprocessor != null) {
+
+                }
+                dataParsed = gson.fromJson(s, type);
 
 //                    Reader reader = new InputStreamReader(new ByteArrayInputStream(data));
 //                    JsonReader jsonReader = new JsonReader(reader);
