@@ -48,10 +48,12 @@ public class HttpImageLoader {
     private static HttpImageLoader instance;
     private ImageLoader imgLoader;
     private ImageLoader imgLoaderPNG;
+    private ImageLoader imgLoaderPermanent;
 
     private RamImageCache ramCache;
     private DiskImageCache diskCache;
     private DiskImageCache diskCachePNG;
+    private DiskImageCache diskCachePermanent;
     private WeakRamCache weakCache;
     private RequestQueue mRequestQueue;
 
@@ -66,9 +68,13 @@ public class HttpImageLoader {
         return imgLoader;
     }
 
-    public ImageLoader getLoader(boolean needTransparency){
+    public ImageLoader getLoader(boolean needTransparency, boolean needPermanency){
         if(!needTransparency){
             return getLoader();
+        }
+
+        if (needPermanency) {
+            return imgLoaderPermanent;
         }
 
         if(imgLoaderPNG == null){
@@ -90,6 +96,15 @@ public class HttpImageLoader {
      * @param ratioTransparency part of disk cache reserved for transparent images - 0 mean no transparent images
      */
     public void initImageLoader(Context ctx, int ratioTransparency) {
+        initImageLoader(ctx, ratioTransparency, false);
+    }
+
+    /**
+     * Must be called once at app startup
+     * @param ctx
+     * @param ratioTransparency part of disk cache reserved for transparent images - 0 mean no transparent images
+     */
+    public void initImageLoader(Context ctx, int ratioTransparency, boolean hasPermanentImages) {
         ramCache = new RamImageCache();
         weakCache = new WeakRamCache();
 
@@ -97,17 +112,22 @@ public class HttpImageLoader {
         if(ratioTransparency >1 || ratioTransparency < 0){
             ratioTransparency = 0;
         }
+
+        // Share the disk space between PNG and JPEG (ratio must be between 0 and 1)
         diskCache = new DiskImageCache(ctx, Bitmap.CompressFormat.JPEG, (int) (diskSpace * (1-ratioTransparency)));
         if(ratioTransparency > 0){
             diskCachePNG = new DiskImageCache(ctx, Bitmap.CompressFormat.PNG, (int) (diskSpace * ratioTransparency));
         }
-
+        if (hasPermanentImages) {
+            diskCachePermanent = new DiskImageCache(ctx, Bitmap.CompressFormat.JPEG, 1024 * 3);
+        }
 
         mRequestQueue = Volley.newRequestQueue(ctx);
 
         //"Null" and not "this" as second argument: We do not provide cache for Volley - implement it ourself instead, this is faster and synchrone
         imgLoader = new ImageLoader(mRequestQueue, volleyCacheProxy);
         imgLoaderPNG = new ImageLoader(mRequestQueue, volleyCachePNGProxy);
+        imgLoaderPermanent = new ImageLoader(mRequestQueue, volleyCachePermanentProxy);
     }
 
     public void initImageLoader(Context ctx) {
@@ -117,9 +137,11 @@ public class HttpImageLoader {
     private class ProxyCache implements ImageLoader.ImageCache{
 
         private boolean isPngCache = false;
+        private boolean isPermanentCache = false;
 
-        private ProxyCache(boolean isPngCache) {
+        private ProxyCache(boolean isPngCache, boolean isPermanentCache) {
             this.isPngCache = isPngCache;
+            this.isPermanentCache = isPermanentCache;
         }
 
         @Override
@@ -133,7 +155,9 @@ public class HttpImageLoader {
                 Bitmap bmp = null;
                 if(isPngCache){
                     bmp = diskCachePNG.getBitmap(s);
-                } else{
+                } else if (isPermanentCache) {
+                    bmp = diskCachePermanent.getBitmap(s);
+                } else {
                     bmp = diskCache.getBitmap(s);
                 }
 
@@ -156,14 +180,18 @@ public class HttpImageLoader {
             if(isPngCache && diskCachePNG != null){
                 diskCachePNG.putBitmap(s, bitmap);
             }
-            else if (!isPngCache && diskCache != null) {
+            else if (isPermanentCache && diskCachePermanent != null) {
+                diskCachePermanent.putBitmap(s, bitmap);
+            }
+            else if (!isPngCache && !isPermanentCache && diskCache != null) {
                 diskCache.putBitmap(s, bitmap);
             }
         }
     }
 
-    private ImageLoader.ImageCache volleyCacheProxy = new ProxyCache(false);
-    private ImageLoader.ImageCache volleyCachePNGProxy = new ProxyCache(true);
+    private ImageLoader.ImageCache volleyCacheProxy = new ProxyCache(false, false);
+    private ImageLoader.ImageCache volleyCachePNGProxy = new ProxyCache(true, false);
+    private ImageLoader.ImageCache volleyCachePermanentProxy = new ProxyCache(false, true);
 
     public Bitmap getBitmapRam(String url) {
         Bitmap bmp = ramCache.getBitmap(url);
@@ -175,12 +203,19 @@ public class HttpImageLoader {
     }
 
     public void cacheModifiedBitmap(String url, Bitmap bitmap, boolean isPNG) {
+        cacheModifiedBitmap(url, bitmap, isPNG, false);
+    }
+
+    public void cacheModifiedBitmap(String url, Bitmap bitmap, boolean isPNG, boolean isPermanent) {
         ramCache.put(url, bitmap);
         if (diskCache != null && !isPNG) {
             diskCache.putBitmap(url, bitmap);
         }
         if (diskCachePNG != null && isPNG) {
             diskCachePNG.putBitmap(url, bitmap);
+        }
+        if (diskCachePermanent != null && isPermanent) {
+            diskCachePermanent.putBitmap(url, bitmap);
         }
     }
 
