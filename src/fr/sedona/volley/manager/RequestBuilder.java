@@ -544,7 +544,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
 
                 String s = new String(data);
                 if(preprocessor != null) {
-
+                    s = preprocessor.preprocess(s);
                 }
                 dataParsed = gson.fromJson(s, type);
 
