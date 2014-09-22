@@ -39,6 +39,8 @@ import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
@@ -78,8 +80,10 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     protected long cacheTimeToRefresh;
     protected long cacheTimeToLive;
     protected boolean allowBeanCache;
+    private String paramEncoding;
 
-    protected String postParamRaw;
+    //protected String postParamRaw;
+    protected ByteArrayOutputStream postParamRaw;
     protected String contentType;
     protected static String multipartBoundary = "AaB03xBounDaRy";
     protected Map<String, String> postParamUrlEncoded;
@@ -156,25 +160,34 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
      * @return
      */
     public RequestBuilder postParamRaw(String postParamRaw) {
-        this.postParamRaw = postParamRaw;
+        try {
+            this.postParamRaw = new ByteArrayOutputStream();
+            this.postParamRaw.write(postParamRaw.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return this;
     }
 
     private boolean isMultipart = false;
 
 
-    public RequestBuilder postAddMultipart(String headerText, String postParamRaw) {
+    public RequestBuilder postAddMultipart(String headerText, byte[] postParamRaw) {
         isMultipart = true;
         if(contentType == null){
             contentType = "multipart/form-data, boundary="+multipartBoundary;
         }
         if(this.postParamRaw == null){
-            this.postParamRaw = "";
+            this.postParamRaw = new ByteArrayOutputStream();
         }
 
-        this.postParamRaw += "\n--"+multipartBoundary+"\n";
-        this.postParamRaw += headerText + ";\n";
-        this.postParamRaw += postParamRaw;
+        try{
+            this.postParamRaw.write(("\r\n--"+multipartBoundary+"\r\n").getBytes());
+            this.postParamRaw.write((headerText + "\r\n\r\n").getBytes());
+            this.postParamRaw.write(postParamRaw);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return this;
     }
 
@@ -184,12 +197,16 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
             contentType = "multipart/form-data, boundary="+multipartBoundary;
         }
         if(this.postParamRaw == null){
-            this.postParamRaw = "";
+            this.postParamRaw = new ByteArrayOutputStream();
         }
 
-        this.postParamRaw += "\n--"+multipartBoundary+"\n";
-        this.postParamRaw += "content-disposition: form-data; name=" + name+"\n";
-        this.postParamRaw += "\n" + value;
+        try{
+            this.postParamRaw.write(("\r\n--"+multipartBoundary+"\r\n").getBytes());
+            this.postParamRaw.write(("content-disposition: form-data; name=" + name+"\r\n").getBytes());
+            this.postParamRaw.write(("\r\n" + value).getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return this;
     }
 
@@ -287,6 +304,11 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
      */
     public RequestBuilder cacheTimeToRefresh(long cacheTimeToRefresh) {
         this.cacheTimeToRefresh = cacheTimeToRefresh;
+        return this;
+    }
+
+    public RequestBuilder paramEncoding(String encoding){
+        paramEncoding = encoding;
         return this;
     }
 
@@ -409,9 +431,25 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     public byte[] getBody() throws AuthFailureError {
         if (postParamRaw != null) {
             if(isMultipart){
-                this.postParamRaw += "\n--"+multipartBoundary;
+                try{
+                    this.postParamRaw.write(("\r\n--"+multipartBoundary+"--\r\n").getBytes());
+                }catch (Exception e){}
             }
-            return postParamRaw.getBytes();
+
+//            if(paramEncoding != null){
+//                try {
+//                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                    OutputStreamWriter writer = new OutputStreamWriter(baos, paramEncoding);
+//                    writer.append(postParamRaw);
+//                    writer.close();
+//
+//                    return baos.toByteArray();
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+
+            return postParamRaw.toByteArray();
         }
         return super.getBody();
     }
@@ -421,6 +459,14 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
             return contentType + "; charset=" + getParamsEncoding();
         }
         return super.getBodyContentType();
+    }
+
+    @Override
+    protected String getParamsEncoding() {
+        if(paramEncoding != null){
+            return paramEncoding;
+        }
+        return super.getParamsEncoding();
     }
 
     @Override
