@@ -69,9 +69,11 @@ public class HttpImageLoader {
     }
 
     public ImageLoader getLoader(boolean needTransparency, boolean needPermanency){
-        if (needPermanency) {
-            return imgLoaderPermanent;
-        }
+        //TODO Freeze à l'appel du cache Permanency: à corriger
+//        if (needPermanency) {
+//            return imgLoaderPermanent;
+//        }
+
         if(needTransparency){
             return imgLoaderPNG;
         }
