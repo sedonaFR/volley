@@ -69,18 +69,13 @@ public class HttpImageLoader {
     }
 
     public ImageLoader getLoader(boolean needTransparency, boolean needPermanency){
-        if(!needTransparency){
-            return getLoader();
-        }
-
         if (needPermanency) {
             return imgLoaderPermanent;
         }
-
-        if(imgLoaderPNG == null){
-            Log.e("HttpImageLoader", "Must call initImageLoader method of HttpImageLoader");
+        if(needTransparency){
+            return imgLoaderPNG;
         }
-        return imgLoaderPNG;
+        return getLoader();
     }
 
     public static HttpImageLoader get() {
