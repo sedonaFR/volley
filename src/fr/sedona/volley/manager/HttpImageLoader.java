@@ -99,7 +99,7 @@ public class HttpImageLoader {
      * @param ctx
      * @param ratioTransparency part of disk cache reserved for transparent images - 0 mean no transparent images
      */
-    public void initImageLoader(Context ctx, int ratioTransparency, boolean hasPermanentImages) {
+    public void initImageLoader(Context ctx, float ratioTransparency, boolean hasPermanentImages) {
         ramCache = new RamImageCache();
         weakCache = new WeakRamCache();
 
