@@ -116,6 +116,12 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         RequestBuilder.getQueue().getCache().removeByCriteria(criteria);
     }
 
+    public void noCache() {
+        cacheTimeToRefresh(0);
+        cacheTimeToLive(0);
+        allowBeanCache(false);
+    }
+
     public static interface StringPreprocessor {
         public String preprocess(String s);
     }
