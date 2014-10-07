@@ -198,6 +198,9 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     }
 
     public RequestBuilder postAddMultipartForm(String name, String value) {
+        if (name == null || value == null) {
+            return this;
+        }
         isMultipart = true;
         if(contentType == null){
             contentType = "multipart/form-data, boundary="+multipartBoundary;
