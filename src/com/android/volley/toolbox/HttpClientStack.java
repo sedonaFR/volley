@@ -101,6 +101,12 @@ public class HttpClientStack implements HttpStack {
         return mClient.execute(httpRequest, localContext);
     }
 
+    @Override
+    public java.net.CookieStore getCookieStore() {
+        //TODO apache cookie to be handled
+        return null;
+    }
+
     /**
      * Creates the appropriate subclass of HttpUriRequest for passed in request.
      */

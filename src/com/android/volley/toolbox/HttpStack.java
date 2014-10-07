@@ -22,6 +22,7 @@ import com.android.volley.Request;
 import org.apache.http.HttpResponse;
 
 import java.io.IOException;
+import java.net.CookieStore;
 import java.util.Map;
 
 /**
@@ -41,5 +42,8 @@ public interface HttpStack {
      */
     public HttpResponse performRequest(Request<?> request, Map<String, String> additionalHeaders)
         throws IOException, AuthFailureError;
+
+
+    public CookieStore getCookieStore();
 
 }

@@ -255,4 +255,8 @@ public class BasicNetwork implements Network {
         }
         return result;
     }
+
+    public HttpStack getmHttpStack() {
+        return mHttpStack;
+    }
 }

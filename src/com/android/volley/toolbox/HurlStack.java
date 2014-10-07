@@ -98,6 +98,11 @@ public class HurlStack implements HttpStack {
     private final java.net.CookieManager cookieManager;
 
     @Override
+    public java.net.CookieStore getCookieStore() {
+        return cookieManager.getCookieStore();
+    }
+
+    @Override
     public HttpResponse performRequest(Request<?> request, Map<String, String> additionalHeaders)  throws IOException, AuthFailureError {
         String url = request.getUrl();
 

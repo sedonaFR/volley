@@ -16,6 +16,8 @@
 
 package com.android.volley;
 
+import java.net.CookieStore;
+
 /**
  * An interface for performing requests.
  */
@@ -27,4 +29,6 @@ public interface Network {
      * @throws VolleyError on errors
      */
     public NetworkResponse performRequest(Request<?> request) throws VolleyError;
+
+    public CookieStore getCookieStore();
 }

@@ -19,6 +19,7 @@ package com.android.volley;
 import android.os.Handler;
 import android.os.Looper;
 
+import java.net.CookieStore;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -122,6 +123,13 @@ public class RequestQueue {
      */
     public RequestQueue(Cache cache, Network network) {
         this(cache, network, DEFAULT_NETWORK_THREAD_POOL_SIZE);
+    }
+
+    public CookieStore getCookieStore(){
+        if (mNetwork == null) {
+            return null;
+        }
+        return mNetwork.getCookieStore();
     }
 
     /**
