@@ -42,6 +42,7 @@ import org.apache.http.impl.cookie.DateUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.CookieStore;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.Date;
@@ -158,6 +159,14 @@ public class BasicNetwork implements Network {
                 }
             }
         }
+    }
+
+    @Override
+    public CookieStore getCookieStore() {
+        if (mHttpStack == null) {
+            return null;
+        }
+        return mHttpStack.getCookieStore();
     }
 
     /**
