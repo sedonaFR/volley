@@ -14,7 +14,7 @@ public class NetworkImageViewTest extends InstrumentationTestCase {
         mNIV = new NetworkImageView(getInstrumentation().getContext());
     }
 
-    public void testSetImageUrl_requestsImage() {
+    public void testSetImageUrlrequestsImage() {
         mNIV.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
         mNIV.setImageUrl("http://foo", mMockImageLoader);
         assertEquals("http://foo", mMockImageLoader.lastRequestUrl);
@@ -22,7 +22,7 @@ public class NetworkImageViewTest extends InstrumentationTestCase {
         assertEquals(0, mMockImageLoader.lastMaxHeight);
     }
 
-    // public void testSetImageUrl_setsMaxSize() {
+    // public void testSetImageUrlsetsMaxSize() {
     // // TODO: Not sure how to make getWidth() return something from an
     // // instrumentation test. Write this test once it's figured out.
     // }

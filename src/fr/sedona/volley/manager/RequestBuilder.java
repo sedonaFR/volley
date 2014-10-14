@@ -406,6 +406,18 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         queue.add(this);
     }
 
+    public void startSynchroneOnlyCache(){
+        Cache.Entry entry = queue.getCache().get(getCacheKey());
+        if (entry == null) {
+            ResultInfo queryResultInfo = new ResultInfo(ResultInfo.CODE_QUERY.SERVER_ERROR);
+            sendCallback(queryResultInfo, null, null);
+            return;
+        }
+
+        Response<T> response = parseNetworkResponse(new NetworkResponse(entry.data, entry.responseHeaders));
+        deliverResponse(response.result);
+    }
+
     protected String generateUrl(String url, Map<String, Object> getParameters) {
         if(getParameters == null || url == null) {
             return url;
@@ -534,6 +546,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
 
     protected void sendCallback(ResultInfo queryResultInfo, T dataParsed, E dataError){
         if(callbackRef != null) {
+            queryResultInfo.setTag(tag);
             QueryCallback<T, E> callback = callbackRef.get();
             if (callback == null) {
                 return;
