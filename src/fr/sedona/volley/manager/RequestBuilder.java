@@ -109,6 +109,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
             }
         });
         queue.getCache().clear();
+        clearAllCookies();
         BeanCacheMap.get().clear();
     }
 
@@ -121,6 +122,10 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         cacheTimeToRefresh(0);
         cacheTimeToLive(0);
         allowBeanCache(false);
+    }
+
+    public static void clearAllCookies() {
+        getQueue().getCookieStore().removeAll();
     }
 
     public static interface StringPreprocessor {
