@@ -290,6 +290,10 @@ public class DiskBasedCache implements Cache {
         while (iterator.hasNext()) {
             Map.Entry<String, CacheHeader> entry = iterator.next();
             CacheHeader e = entry.getValue();
+            if(e.alwaysKeep){
+                continue;
+            }
+
             boolean deleted = getFileForKey(e.key).delete();
             if (deleted) {
                 mTotalSize -= e.size;
@@ -377,6 +381,8 @@ public class DiskBasedCache implements Cache {
         /** Soft TTL for this record. */
         public long softTtl;
 
+        public boolean alwaysKeep;
+
         /** Headers from the response resulting in this cache entry. */
         public Map<String, String> responseHeaders;
 
@@ -395,6 +401,7 @@ public class DiskBasedCache implements Cache {
             this.ttl = entry.ttl;
             this.softTtl = entry.softTtl;
             this.responseHeaders = entry.responseHeaders;
+            this.alwaysKeep = entry.alwaysKeep;
         }
 
         /**

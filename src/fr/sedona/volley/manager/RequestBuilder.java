@@ -92,6 +92,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     protected static RequestQueue queue;
     private Object tag;
     private StringPreprocessor preprocessor;
+    private boolean alwaysKeepInCache = false;
 
     public static RequestQueue getQueue(){
         return queue;
@@ -496,6 +497,10 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         return super.getCacheKey();
     }
 
+    public void alwaysKeepInCache(boolean b) {
+        alwaysKeepInCache = b;
+    }
+
     @Override
     protected Map<String, String> getParams() throws AuthFailureError {
         return postParamUrlEncoded;
@@ -517,6 +522,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         entry.ttl = now + cacheTimeToLive;
         entry.serverDate = now;
         entry.responseHeaders = networkResponse.headers;
+        entry.alwaysKeep = alwaysKeepInCache;
 
         return Response.success(dataParsed, entry);
     }

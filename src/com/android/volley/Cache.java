@@ -82,6 +82,8 @@ public interface Cache {
         /** TTL for this record. */
         public long ttl;
 
+        public boolean alwaysKeep;
+
         /** Soft TTL for this record. */
         public long softTtl;
 
