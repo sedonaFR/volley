@@ -124,6 +124,10 @@ public class HurlStack implements HttpStack {
         for (String headerName : map.keySet()) {
             connection.addRequestProperty(headerName, map.get(headerName));
         }
+        String userAgent = request.getUserAgent();
+        if(userAgent != null){
+            connection.addRequestProperty("User-Agent", userAgent);
+        }
 
         List<HttpCookie> cookiesLog = cookieManager.getCookieStore().getCookies();
         List<HttpCookie> cookiesList = cookieManager.getCookieStore().get(uriCookie);

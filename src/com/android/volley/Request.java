@@ -43,6 +43,10 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      */
     private static final String DEFAULT_PARAMS_ENCODING = "UTF-8";
 
+    public String getUserAgent(){
+        return null;
+    }
+
     /**
      * Supported request methods.
      */
