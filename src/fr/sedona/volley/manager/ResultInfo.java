@@ -54,7 +54,7 @@ public class ResultInfo {
     }
 
     public static enum CODE_QUERY{
-        SUCCESS, SERVER_ERROR, NETWORK_ERROR, NOT_AUTHORIZED, NOT_FOUND
+        SUCCESS, SERVER_ERROR, NETWORK_ERROR, NOT_AUTHORIZED, NOT_FOUND, ERROR_ALREADY_MANAGED
     }
 
     public ResultInfo() {
