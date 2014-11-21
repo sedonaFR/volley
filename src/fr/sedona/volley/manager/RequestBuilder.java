@@ -274,6 +274,18 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         this.tag = tag;
         return this;
     }
+	
+	/**
+     * Timeout of the request
+     * @param timeout
+     * @return
+     */
+    public RequestBuilder timeout(int timeout) {
+        setRetryPolicy(new DefaultRetryPolicy(timeout, NO_REQUEST_RETRY_COUNT, 1f));
+        return this;
+    }
+
+    /**
 
     /**
      * Call it once to allow the cookie management for any query
@@ -579,9 +591,10 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
             queryResultInfo.setTag(tag);
             E dataParsed = null;
 
-            if (error instanceof TimeoutError || error instanceof NetworkError) {
+			if (error instanceof NetworkError) {
                 queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.NETWORK_ERROR;
-
+            } else if(error instanceof TimeoutError){
+                queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.TIMEOUT_ERROR;
             } else if (error.networkResponse != null) {
                 int http = error.networkResponse.statusCode;
                 queryResultInfo.errorResponse = error.networkResponse.data;
@@ -608,7 +621,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
      * @param <U> T or E depending of the data to be parsed
      * @return
      */
-    private <U> U parseData(Object dataParser, byte[] data) {
+    protected <U> U parseData(Object dataParser, byte[] data) {
         //String dataStr = new String(data);
         U dataParsed = null;
 
