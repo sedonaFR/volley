@@ -52,9 +52,9 @@ public class ResultInfo {
     public void setTag(Object tag) {
         this.tag = tag;
     }
-
-    public static enum CODE_QUERY{
-        SUCCESS, SERVER_ERROR, NETWORK_ERROR, NOT_AUTHORIZED, NOT_FOUND, ERROR_ALREADY_MANAGED
+	
+	public static enum CODE_QUERY{
+        SUCCESS, SERVER_ERROR, TIMEOUT_ERROR, NETWORK_ERROR, NOT_AUTHORIZED, NOT_FOUND, ERROR_ALREADY_MANAGED
     }
 
     public ResultInfo() {
