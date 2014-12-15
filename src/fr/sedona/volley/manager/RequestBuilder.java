@@ -30,6 +30,7 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
@@ -128,6 +129,8 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         cacheTimeToRefresh(0);
         cacheTimeToLive(0);
         allowBeanCache(false);
+        //Rajout le 15/12/2004 par afe
+        setShouldCache(false);
     }
 
     public static void clearAllCookies() {
@@ -599,6 +602,11 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
 
 			if (error instanceof NetworkError) {
                 queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.NETWORK_ERROR;
+            } else if(error instanceof ServerError){
+                //Changement le 15/12/2004 par afe (précedemment
+                // if(error instanceof ServerError){
+                //queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.NETWORK_ERROR;
+                queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.SERVER_ERROR;
             } else if(error instanceof TimeoutError){
                 queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.TIMEOUT_ERROR;
             } else if (error.networkResponse != null) {
