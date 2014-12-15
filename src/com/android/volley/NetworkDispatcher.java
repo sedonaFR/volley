@@ -97,8 +97,7 @@ public class NetworkDispatcher extends Thread {
             try {
                 request.addMarker("network-queue-take");
 
-                // If the request was cancelled already, do not perform the
-                // network request.
+                // If the request was cancelled already, do not perform the network request.
                 if (request.isCanceled()) {
                     request.finish("network-discard-cancelled");
                     continue;
@@ -110,11 +109,21 @@ public class NetworkDispatcher extends Thread {
                 NetworkResponse networkResponse = mNetwork.performRequest(request);
                 request.addMarker("network-http-complete");
 
-                // If the server returned 304 AND we delivered a response already,
-                // we're done -- don't deliver a second identical response.
+                // If the server returned 304 AND we delivered a response already, we're done -- don't deliver a second identical response.
                 if (networkResponse.notModified && request.hasHadResponseDelivered()) {
                     request.finish("not-modified");
                     continue;
+                }
+                // If the server returned 304 AND we never delivered a response: try to get the last cache
+                if (networkResponse.notModified){
+                    Cache.Entry entry = mCache.get(request.getCacheKey());
+
+                    if(entry != null){
+                        Response<?> response = request.parseNetworkResponse(new NetworkResponse(entry.data, entry.responseHeaders));
+                        request.addMarker("cache-hit-parsed");
+                        mDelivery.postResponse(request, response);
+                        continue;
+                    }
                 }
 
                 // Parse the response here on the worker thread.
