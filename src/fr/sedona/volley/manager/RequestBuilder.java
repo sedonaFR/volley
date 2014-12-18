@@ -40,6 +40,7 @@ import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
+import com.jakewharton.disklrucache.Util;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -55,6 +56,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -539,10 +541,12 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         }
         if(postAsCacheKey){
             if(postParamUrlEncoded != null) {
-                key += postParamUrlEncoded.hashCode();
+                for(Map.Entry<String,String> strs: postParamUrlEncoded){
+                    key += strs.getKey().hashCode()+ strs.getValue().hashCode();
+                }
             }
             if(postParamRaw != null){
-                key += postParamRaw.hashCode();
+                key += HttpImageLoader.md5(postParamRaw);
             }
         }
 
