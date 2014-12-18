@@ -100,6 +100,8 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     private Object tag;
     private StringPreprocessor preprocessor;
     private boolean alwaysKeepInCache = false;
+    protected String suffixCacheKey;
+    protected boolean postAsCacheKey;
 
     public static RequestQueue getQueue(){
         return queue;
@@ -135,6 +137,17 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
 
     public static void clearAllCookies() {
         getQueue().getCookieStore().removeAll();
+    }
+
+    public RequestBuilder cacheKeySuffix(String suffixCacheKey) {
+        this.suffixCacheKey = suffixCacheKey;
+        return this;
+    }
+
+
+    public RequestBuilder postAsCacheKey(boolean postAsCacheKey) {
+        this.postAsCacheKey = postAsCacheKey;
+        return this;
     }
 
     public static interface StringPreprocessor {
@@ -520,7 +533,20 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     @Override
     public String getCacheKey() {
         //Can be overriden to add specific info to the cache
-        return super.getCacheKey();
+        String key = super.getCacheKey();
+        if(suffixCacheKey != null){
+            key += suffixCacheKey;
+        }
+        if(postAsCacheKey){
+            if(postParamUrlEncoded != null) {
+                key += postParamUrlEncoded.hashCode();
+            }
+            if(postParamRaw != null){
+                key += postParamRaw.hashCode();
+            }
+        }
+
+        return key;
     }
 
     public void alwaysKeepInCache(boolean b) {
@@ -541,14 +567,17 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         long now = System.currentTimeMillis();
 
         //Build cache entry for this occur
-        Cache.Entry entry = new Cache.Entry();
-        entry.data = networkResponse.data;
-        entry.etag = null;
-        entry.softTtl = now + cacheTimeToRefresh;
-        entry.ttl = now + cacheTimeToLive;
-        entry.serverDate = now;
-        entry.responseHeaders = networkResponse.headers;
-        entry.alwaysKeep = alwaysKeepInCache;
+        Cache.Entry entry = null;
+        if(shouldCache()) {
+            entry = new Cache.Entry();
+            entry.data = networkResponse.data;
+            entry.etag = null;
+            entry.softTtl = now + cacheTimeToRefresh;
+            entry.ttl = now + cacheTimeToLive;
+            entry.serverDate = now;
+            entry.responseHeaders = networkResponse.headers;
+            entry.alwaysKeep = alwaysKeepInCache;
+        }
 
         return Response.success(dataParsed, entry);
     }
