@@ -57,6 +57,7 @@ import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -541,7 +542,8 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         }
         if(postAsCacheKey){
             if(postParamUrlEncoded != null) {
-                for(Map.Entry<String,String> strs: postParamUrlEncoded){
+                Set<Map.Entry<String,String>> set = postParamUrlEncoded.entrySet();
+                for(Map.Entry<String,String> strs: set){
                     key += strs.getKey().hashCode()+ strs.getValue().hashCode();
                 }
             }
