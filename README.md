@@ -5,9 +5,9 @@ Android Volley - easier to use and bug corrections
 
 
 ## How To Use?
-In all samples, we guess that the expected result model is List<Car> and the model on error is MyModelError
+In all samples, we guess that the expected result model is a List of Cars and the model on error is MyModelError
 
-The entry point is RequestBuilder, example for a json result: 
+The entry point is RequestBuilder, this is an example that parse a json result: 
 ```
 RequestBuilder<List<Car>> rb = new RequestBuilder<>("http://yoururl");
 rb.callbackResult(callback);
@@ -16,7 +16,7 @@ rb.parserJson(new TypeToken<QueryResult<List<Car>>>() {
 rb.start();
 ```
 
-We recommend to extends RequestBuilder and statically adds your Web Service generalities here (base url, signing key, ...)
+We recommend to extends RequestBuilder and statically adds your Web Service generalities here (base url, signing key, UserAgent ...)
 
 
 ## Callback
@@ -34,8 +34,7 @@ QueryCallback<List<Car>, MyModelError> callback = new QueryCallback<>(){
 }
 ```
 
-Callback with full error handling:
-Let's guess that the server returns the model MyModelError on error:
+Callback with full error handling. Let's guess that the server returns the model MyModelError on error:
 
 ```
 QueryCallback<List<Car>, MyModelError> callback = new QueryCallback<>(){
@@ -63,7 +62,7 @@ QueryCallback<List<Car>, MyModelError> callback = new QueryCallback<>(){
 ```
 
 ## Functionnalities
-RequestBuilder has some builders methods to help creating the request:
+RequestBuilder has some builders methods to help create the request
 
 ### Cache
 - rb.noCache();
@@ -106,6 +105,7 @@ simple-xml has been chosen for its efficient data-model bindings.
 1. Use simple-xml-2.7.1 http://simple.sourceforge.net/download.php and put the jar in a lib/ folder in the root of the project
 2. Use the Class XmlParserSimple.
 
+#### Error Parser
 Also allow to parse the data on server error.
 - rb.parserErrorJson();
 - rb.parserError();
@@ -123,4 +123,4 @@ This version of Volley manages cookies
 ### CERTIFICATE
 - loadCA() : load a certificate from the assets
 
-'
+
