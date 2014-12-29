@@ -30,6 +30,7 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
@@ -39,6 +40,7 @@ import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
+import com.jakewharton.disklrucache.Util;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -54,6 +56,8 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -99,6 +103,8 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     private Object tag;
     private StringPreprocessor preprocessor;
     private boolean alwaysKeepInCache = false;
+    protected String suffixCacheKey;
+    protected boolean postAsCacheKey;
 
     public static RequestQueue getQueue(){
         return queue;
@@ -128,10 +134,23 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         cacheTimeToRefresh(0);
         cacheTimeToLive(0);
         allowBeanCache(false);
+        //Rajout le 15/12/2004 par afe
+        setShouldCache(false);
     }
 
     public static void clearAllCookies() {
         getQueue().getCookieStore().removeAll();
+    }
+
+    public RequestBuilder cacheKeySuffix(String suffixCacheKey) {
+        this.suffixCacheKey = suffixCacheKey;
+        return this;
+    }
+
+
+    public RequestBuilder postAsCacheKey(boolean postAsCacheKey) {
+        this.postAsCacheKey = postAsCacheKey;
+        return this;
     }
 
     public static interface StringPreprocessor {
@@ -517,7 +536,23 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     @Override
     public String getCacheKey() {
         //Can be overriden to add specific info to the cache
-        return super.getCacheKey();
+        String key = super.getCacheKey();
+        if(suffixCacheKey != null){
+            key += suffixCacheKey;
+        }
+        if(postAsCacheKey){
+            if(postParamUrlEncoded != null) {
+                Set<Map.Entry<String,String>> set = postParamUrlEncoded.entrySet();
+                for(Map.Entry<String,String> strs: set){
+                    key += strs.getKey().hashCode()+ strs.getValue().hashCode();
+                }
+            }
+            if(postParamRaw != null){
+                key += HttpImageLoader.md5(postParamRaw);
+            }
+        }
+
+        return key;
     }
 
     public void alwaysKeepInCache(boolean b) {
@@ -538,14 +573,17 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         long now = System.currentTimeMillis();
 
         //Build cache entry for this occur
-        Cache.Entry entry = new Cache.Entry();
-        entry.data = networkResponse.data;
-        entry.etag = null;
-        entry.softTtl = now + cacheTimeToRefresh;
-        entry.ttl = now + cacheTimeToLive;
-        entry.serverDate = now;
-        entry.responseHeaders = networkResponse.headers;
-        entry.alwaysKeep = alwaysKeepInCache;
+        Cache.Entry entry = null;
+        if(shouldCache()) {
+            entry = new Cache.Entry();
+            entry.data = networkResponse.data;
+            entry.etag = null;
+            entry.softTtl = now + cacheTimeToRefresh;
+            entry.ttl = now + cacheTimeToLive;
+            entry.serverDate = now;
+            entry.responseHeaders = networkResponse.headers;
+            entry.alwaysKeep = alwaysKeepInCache;
+        }
 
         return Response.success(dataParsed, entry);
     }
@@ -599,6 +637,11 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
 
 			if (error instanceof NetworkError) {
                 queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.NETWORK_ERROR;
+            } else if(error instanceof ServerError){
+                //Changement le 15/12/2004 par afe (précedemment
+                // if(error instanceof ServerError){
+                //queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.NETWORK_ERROR;
+                queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.SERVER_ERROR;
             } else if(error instanceof TimeoutError){
                 queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.TIMEOUT_ERROR;
             } else if (error.networkResponse != null) {

@@ -32,6 +32,7 @@ import com.jakewharton.disklrucache.DiskLruCache;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -425,6 +426,26 @@ public class HttpImageLoader {
         }
         try {
             byte messageDigest[] = MessageDigest.getInstance("MD5").digest(s.getBytes());
+            // Create Hex String
+            BigInteger bi = new BigInteger(1, messageDigest);
+            String result = bi.toString(16);
+            if (result.length() % 2 != 0)
+                result = (new StringBuilder("0")).append(result).toString();
+
+            return result;
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public static String md5(ByteArrayOutputStream s) {
+        if (s == null) {
+            return null;
+        }
+        try {
+            byte messageDigest[] = MessageDigest.getInstance("MD5").digest(s.toByteArray());
             // Create Hex String
             BigInteger bi = new BigInteger(1, messageDigest);
             String result = bi.toString(16);
