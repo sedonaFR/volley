@@ -350,7 +350,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     }
 
     /**
-     * If the data is out of date, the result with still be returned but a query is loaded
+     * If the data is out of date, the result will still be returned but a query is loaded in parallel
      * @param cacheTimeToRefresh
      * @return
      */
@@ -365,7 +365,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     }
 
     /**
-     * If the data is out of date, a query must be done before providing the result
+     * If out of date, a request MUST be done, no result is returned before the end of the query
      * @param cacheTimeToLive
      * @return
      */
