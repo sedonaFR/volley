@@ -89,7 +89,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
     protected int queryId;
     protected long cacheTimeToRefresh;
     protected long cacheTimeToLive;
-    protected boolean allowBeanCache;
+    protected int allowBeanCache;
     private String paramEncoding;
 
     //protected String postParamRaw;
@@ -380,7 +380,12 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
      * @return
      */
     public RequestBuilder allowBeanCache(boolean allowBeanCache) {
-        this.allowBeanCache = allowBeanCache;
+        this.allowBeanCache = allowBeanCache ? 1 : -1;
+        return this;
+    }
+
+    public RequestBuilder allowBeanCacheSavingOnly() {
+        this.allowBeanCache = 0;
         return this;
     }
 
@@ -427,14 +432,14 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         //set Default cache values
         cacheTimeToRefresh = 0;
         cacheTimeToLive = 0;
-        allowBeanCache = false;
+        allowBeanCache = -1;
     }
 
     /**
      * Start the query. At last!
      */
     public void start(){
-        if (allowBeanCache) {
+        if (allowBeanCache > 0) {
             Object dataParsed = BeanCacheMap.get().get(getUrl());
             if (dataParsed != null) {
                 try {
@@ -446,6 +451,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
                 }
             }
         }
+
         queue.add(this);
     }
 
@@ -590,7 +596,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
 
     @Override
     protected void deliverResponse(T dataParsed) {
-        if (allowBeanCache) {
+        if (allowBeanCache >= 0) {
             BeanCacheMap.get().put(getUrl(), dataParsed);
         }
 
