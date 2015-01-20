@@ -584,7 +584,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
             entry = new Cache.Entry();
             entry.data = networkResponse.data;
             entry.etag = null;
-            entry.softTtl = now + cacheTimeToRefresh;
+            entry.softTtl = now + cacheTimeToRefresh <= 0 ?  cacheTimeToLive: cacheTimeToRefresh;
             entry.ttl = now + cacheTimeToLive;
             entry.serverDate = now;
             entry.responseHeaders = networkResponse.headers;
