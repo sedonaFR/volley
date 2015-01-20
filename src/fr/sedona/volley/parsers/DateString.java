@@ -14,7 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Created by bdelville on 27/10/2014.
+ * Created by  on 27/10/2014.
  */
 public class DateString {
     private String value;

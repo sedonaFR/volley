@@ -638,9 +638,6 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
 			if (error instanceof NetworkError) {
                 queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.NETWORK_ERROR;
             } else if(error instanceof ServerError){
-                //Changement le 15/12/2004 par afe (précedemment
-                // if(error instanceof ServerError){
-                //queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.NETWORK_ERROR;
                 queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.SERVER_ERROR;
             } else if(error instanceof TimeoutError){
                 queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.TIMEOUT_ERROR;
