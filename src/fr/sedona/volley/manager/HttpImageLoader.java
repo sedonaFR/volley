@@ -459,17 +459,4 @@ public class HttpImageLoader {
         }
         return "";
     }
-
-    public static long fastHashBitmap(Bitmap bmp){
-        int incWidth = 1;//(int) Math.sqrt(bmp.getWidth());
-        int incHeight = 1;//(int) Math.sqrt(bmp.getHeight());
-
-        long hash = 25; //or a higher prime at your choice
-        for(int x = 0; x < bmp.getWidth(); x+=incWidth){
-            for (int y = 0; y < bmp.getHeight(); y+=incHeight){
-                hash *= (bmp.getPixel(x,y) + 25);
-            }
-        }
-        return hash;
-    }
 }

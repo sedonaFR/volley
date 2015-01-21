@@ -16,6 +16,7 @@
 
 package fr.sedona.volley.manager;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.http.AndroidHttpClient;
@@ -138,6 +139,10 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         setShouldCache(false);
     }
 
+    /**
+     * Do not call if API < 9
+     */
+    @SuppressLint("NewApi")
     public static void clearAllCookies() {
         getQueue().getCookieStore().removeAll();
     }
