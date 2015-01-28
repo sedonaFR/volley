@@ -419,7 +419,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
      * @param url Url to use
      */
     public RequestBuilder(int method, String url) {
-        this(method, null, null);
+        this(method, url, null);
     }
 
     /**
