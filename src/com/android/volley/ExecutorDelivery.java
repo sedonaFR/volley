@@ -94,6 +94,14 @@ public class ExecutorDelivery implements ResponseDelivery {
                 return;
             }
 
+            // If this is an intermediate response, add a marker, otherwise we're done and the request can be finished.
+            if (mResponse.intermediate) {
+                mRequest.setIsIntermediate(true);
+                mRequest.addMarker("intermediate-response");
+            } else{
+                mRequest.setIsIntermediate(false);
+            }
+
             // Deliver a normal response or error, depending.
             if (mResponse.isSuccess()) {
                 mRequest.deliverResponse(mResponse.result);
@@ -101,11 +109,8 @@ public class ExecutorDelivery implements ResponseDelivery {
                 mRequest.deliverError(mResponse.error);
             }
 
-            // If this is an intermediate response, add a marker, otherwise we're done
-            // and the request can be finished.
-            if (mResponse.intermediate) {
-                mRequest.addMarker("intermediate-response");
-            } else {
+            // If this is an intermediate response, add a marker, otherwise we're done and the request can be finished.
+            if (!mResponse.intermediate) {
                 mRequest.finish("done");
             }
 

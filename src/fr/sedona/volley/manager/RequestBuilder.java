@@ -613,7 +613,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
                 Cache.Entry currentDataCacheEntry = queue.getCache().get(this.getCacheKey());
                 if (currentDataCacheEntry != null) {
                     //In this case, Volley return the data cache in first callback, then network result in a 2nd callback
-                    queryResultInfo.dataIsRefreshing = !currentDataCacheEntry.isExpired() && currentDataCacheEntry.refreshNeeded();
+                    queryResultInfo.dataIsRefreshing = isIntermediate();
                     queryResultInfo.dataDatetime = currentDataCacheEntry.serverDate;
                 }
             }
