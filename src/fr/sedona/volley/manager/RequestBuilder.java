@@ -648,23 +648,31 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
 
 			if (error instanceof NetworkError) {
                 queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.NETWORK_ERROR;
-            } else if(error instanceof ServerError){
-                queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.SERVER_ERROR;
-            } else if(error instanceof TimeoutError){
+            }
+            else if(error instanceof TimeoutError){
                 queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.TIMEOUT_ERROR;
-            } else if (error.networkResponse != null) {
-                int http = error.networkResponse.statusCode;
-                queryResultInfo.errorResponse = error.networkResponse.data;
-                queryResultInfo.httpCode = http;
+            }
+            else if(error instanceof AuthFailureError){
+                queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.NOT_AUTHORIZED;
+            }
+            else {
+                //if(error instanceof ServerError)
+                queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.SERVER_ERROR;
 
-                if (http == 401 || http == 403) {
-                    queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.NOT_AUTHORIZED;
-                }
+                if (error.networkResponse != null) {
+                    int http = error.networkResponse.statusCode;
+                    queryResultInfo.errorResponse = error.networkResponse.data;
+                    queryResultInfo.httpCode = http;
 
-                try{
-                    dataParsed = parseData(parserError,  error.networkResponse.data);
-                } catch(Exception e){
-                    e.printStackTrace();
+                    if (http == 401 || http == 403) {
+                        queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.NOT_AUTHORIZED;
+                    }
+
+                    try {
+                        dataParsed = parseData(parserError, error.networkResponse.data);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
