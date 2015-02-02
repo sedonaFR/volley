@@ -631,10 +631,11 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
             Cache.Entry currentDataCacheEntry = queue.getCache().get(this.getCacheKey());
             if (currentDataCacheEntry != null) {
                 //In this case, Volley return the data cache in first callback, then network result in a 2nd callback
-                queryResultInfo.dataIsRefreshing = !currentDataCacheEntry.isExpired() && currentDataCacheEntry.refreshNeeded();
+                queryResultInfo.dataIsRefreshing = isIntermediate();
                 queryResultInfo.dataDatetime = currentDataCacheEntry.serverDate;
             }
         }
+
         queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.SUCCESS;
 
         sendCallback(queryResultInfo, dataParsed, null);
@@ -658,8 +659,6 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
         if (VolleyLog.DEBUG) {
             error.printStackTrace();
         }
-
-
         ResultInfo queryResultInfo = new ResultInfo(ResultInfo.CODE_QUERY.SERVER_ERROR);
         queryResultInfo.setTag(tag);
         E dataParsed = null;
@@ -673,21 +672,32 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
             queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.NETWORK_ERROR;
         } else if (error instanceof ServerError) {
             queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.SERVER_ERROR;
-        } else if (error instanceof TimeoutError) {
-            queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.TIMEOUT_ERROR;
-        } else if (error.networkResponse != null) {
-            int http = error.networkResponse.statusCode;
-            queryResultInfo.errorResponse = error.networkResponse.data;
-            queryResultInfo.httpCode = http;
-
-            if (http == 401 || http == 403) {
-                queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.NOT_AUTHORIZED;
-            }
 
             try {
                 dataParsed = parseData(parserError, error.networkResponse.data);
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+        } else if (error instanceof TimeoutError) {
+            queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.TIMEOUT_ERROR;
+        } else if (error instanceof AuthFailureError) {
+            queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.NOT_AUTHORIZED;
+        } else {
+            queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.SERVER_ERROR;
+
+            if (error.networkResponse != null) {
+                int http = error.networkResponse.statusCode;
+                queryResultInfo.errorResponse = error.networkResponse.data;
+                queryResultInfo.httpCode = http;
+
+                if (http == 401 || http == 403) {
+                    queryResultInfo.codeQuery = ResultInfo.CODE_QUERY.NOT_AUTHORIZED;
+                }
+                try {
+                    dataParsed = parseData(parserError, error.networkResponse.data);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -700,6 +710,7 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
      * @param <U>        T or E depending of the data to be parsed
      * @return
      */
+
     protected <U> U parseData(Object dataParser, byte[] data) {
         //String dataStr = new String(data);
         U dataParsed = null;

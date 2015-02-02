@@ -115,25 +115,21 @@ public class CacheDispatcher extends Thread {
 
                 // We have a cache hit; parse its data for delivery back to the request.
                 request.addMarker("cache-hit");
-                Response<?> response = request.parseNetworkResponse(
-                        new NetworkResponse(entry.data, entry.responseHeaders));
+                Response<?> response = request.parseNetworkResponse(new NetworkResponse(entry.data, entry.responseHeaders));
                 request.addMarker("cache-hit-parsed");
 
                 if (!entry.refreshNeeded()) {
                     // Completely unexpired cache hit. Just deliver the response.
                     mDelivery.postResponse(request, response);
                 } else {
-                    // Soft-expired cache hit. We can deliver the cached response,
-                    // but we need to also send the request to the network for
-                    // refreshing.
+                    // Soft-expired cache hit. We can deliver the cached response, but we need to also send the request to the network for refreshing.
                     request.addMarker("cache-hit-refresh-needed");
                     request.setCacheEntry(entry);
 
                     // Mark the response as intermediate.
                     response.intermediate = true;
 
-                    // Post the intermediate response back to the user and have
-                    // the delivery then forward the request along to the network.
+                    // Post the intermediate response back to the user and have the delivery then forward the request along to the network.
                     mDelivery.postResponse(request, response, new Runnable() {
                         @Override
                         public void run() {
