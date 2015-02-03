@@ -42,22 +42,31 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Default encoding for POST or PUT parameters. See {@link #getParamsEncoding()}.
      */
     private static final String DEFAULT_PARAMS_ENCODING = "UTF-8";
-    private boolean isIntermediate;
+    private STATUS_RESULT orderResult = STATUS_RESULT.direct;
+
+    public static enum STATUS_RESULT {
+        intermediate, direct, afterIntermediate
+    }
 
     public String getUserAgent(){
         return null;
     }
 
-    public void setIsIntermediate(boolean isIntermediate) {
-        this.isIntermediate = isIntermediate;
+    public void setIsIntermediate() {
+        this.orderResult = STATUS_RESULT.intermediate;
     }
 
-    public boolean isIntermediate() {
-        return isIntermediate;
+    public void setIsFromNetwork() {
+        if(orderResult == STATUS_RESULT.intermediate){
+            orderResult = STATUS_RESULT.afterIntermediate;
+        } else{
+            orderResult = STATUS_RESULT.direct;
+        }
     }
 
-    public void setIntermediate(boolean isIntermediate) {
-        this.isIntermediate = isIntermediate;
+
+    public STATUS_RESULT getOrderResult() {
+        return orderResult;
     }
 
     /**

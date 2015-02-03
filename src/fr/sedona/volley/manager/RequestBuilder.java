@@ -31,7 +31,6 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
@@ -41,7 +40,6 @@ import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
-import com.jakewharton.disklrucache.Util;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -57,7 +55,6 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.net.ssl.SSLContext;
@@ -613,7 +610,8 @@ public class RequestBuilder<T, E> extends Request<T> implements Response.ErrorLi
                 Cache.Entry currentDataCacheEntry = queue.getCache().get(this.getCacheKey());
                 if (currentDataCacheEntry != null) {
                     //In this case, Volley return the data cache in first callback, then network result in a 2nd callback
-                    queryResultInfo.dataIsRefreshing = isIntermediate();
+                    queryResultInfo.orderResult = getOrderResult();
+                    queryResultInfo.dataIsRefreshing = getOrderResult() == STATUS_RESULT.intermediate;
                     queryResultInfo.dataDatetime = currentDataCacheEntry.serverDate;
                 }
             }

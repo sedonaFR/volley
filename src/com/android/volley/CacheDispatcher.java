@@ -126,8 +126,10 @@ public class CacheDispatcher extends Thread {
                     request.addMarker("cache-hit-refresh-needed");
                     request.setCacheEntry(entry);
 
-                    // Mark the response as intermediate.
+                    // If this is an intermediate response, add a marker
                     response.intermediate = true;
+                    request.setIsIntermediate();
+                    request.addMarker("intermediate-response");
 
                     // Post the intermediate response back to the user and have the delivery then forward the request along to the network.
                     mDelivery.postResponse(request, response, new Runnable() {

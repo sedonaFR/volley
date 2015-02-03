@@ -16,6 +16,8 @@
 
 package fr.sedona.volley.manager;
 
+import com.android.volley.Request;
+
 /**
  * Informations about the query result
  */
@@ -36,7 +38,10 @@ public class ResultInfo {
     /**
      * Indicates if the current query data result will be updated in a next callback with the same query id.
      */
+    @Deprecated
     public boolean dataIsRefreshing = false;
+
+    public Request.STATUS_RESULT orderResult;
 
     private Object tag;
 

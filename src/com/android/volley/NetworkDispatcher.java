@@ -138,7 +138,9 @@ public class NetworkDispatcher extends Thread {
                 }
 
                 // Post the response back.
+                request.setIsFromNetwork();
                 request.markDelivered();
+
                 mDelivery.postResponse(request, response);
             } catch (VolleyError volleyError) {
                 parseAndDeliverNetworkError(request, volleyError);
